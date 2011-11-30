@@ -16,6 +16,7 @@
 		strokeWidth = 5;
         strokeAlpha = 1;
 		strokeColor = CGColorRetain([[TiUtils colorValue:@"#000"] _color].CGColor);
+        drawMode = TIPAINT_DRAW_NORMAL;
         self.multipleTouchEnabled = YES;
 	}
 	return self;
@@ -64,7 +65,20 @@
     CGContextSetStrokeColorWithColor(UIGraphicsGetCurrentContext(), strokeColor);
     CGContextBeginPath(UIGraphicsGetCurrentContext());
     CGContextMoveToPoint(UIGraphicsGetCurrentContext(), lastPoint.x, lastPoint.y);
-    CGContextAddLineToPoint(UIGraphicsGetCurrentContext(), currentPoint.x, currentPoint.y);
+    switch (drawMode) {
+        case TIPAINT_DRAW_NORMAL:
+            CGContextAddLineToPoint(UIGraphicsGetCurrentContext(),
+                                    currentPoint.x, currentPoint.y);
+            break;
+        case TIPAINT_DRAW_SMOOTH:
+            CGContextAddQuadCurveToPoint(UIGraphicsGetCurrentContext(),
+                                         (currentPoint.x + lastPoint.x) / 2,
+                                         (currentPoint.y + lastPoint.y) / 2,
+                                         currentPoint.x, currentPoint.y);
+            break;
+        case TIPAINT_DRAW_STRAIGHT:
+            break;
+    }
 }
 
 - (void)drawEraserLineFrom:(CGPoint)lastPoint to:(CGPoint)currentPoint
@@ -142,6 +156,11 @@
 }
 
 #pragma mark Public APIs
+
+- (void)setDrawMode_:(id)value
+{
+    drawMode = [TiUtils intValue:value def:TIPAINT_DRAW_NORMAL];
+}
 
 - (void)setEraseMode_:(id)value
 {

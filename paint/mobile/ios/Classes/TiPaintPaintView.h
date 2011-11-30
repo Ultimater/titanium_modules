@@ -5,6 +5,7 @@
  * and licensed under the Apache Public License (version 2)
  */
 #import "TiUIView.h"
+#import "TiPaintModule.h"
 
 @interface TiPaintPaintView : TiUIView {
 @private
@@ -12,6 +13,7 @@
 	CGFloat strokeWidth;
 	CGFloat strokeAlpha;
 	CGColorRef strokeColor;
+    int drawMode;
 	bool erase;
 }
 

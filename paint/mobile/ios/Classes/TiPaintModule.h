@@ -6,6 +6,12 @@
  */
 #import "TiModule.h"
 
+typedef enum TiPaintDrawingMode {
+	TIPAINT_DRAW_NORMAL,
+    TIPAINT_DRAW_SMOOTH,
+    TIPAINT_DRAW_STRAIGHT
+} TiPaintDrawingMode;
+
 @interface TiPaintModule : TiModule 
 {
 }
