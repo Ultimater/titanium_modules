@@ -132,6 +132,8 @@ public class SocketProxy extends KrollProxy {
 						} else {
 							fireError(e);
 						}
+					} catch (Exception e) {
+						fireError(e);
 					}
 				}
 			}
@@ -152,23 +154,22 @@ public class SocketProxy extends KrollProxy {
 	@Kroll.method
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void start(HashMap hm) {
-		KrollDict args = new KrollDict(hm);
 		try {
 			if (_socket != null) {
 				fireError("Socket already started! Explicitly call stop() before attempting to start it again!");
 				return;
 			}
 
+			KrollDict args = new KrollDict(hm);
 			_port = args.getInt("port");
+			
 			_socket = new DatagramSocket(_port);
 			_socket.setSoTimeout(0);
-
 			startListening();
-
 			fireStarted();
 			Log.i(LCAT, "Socket Started!");
 
-		} catch (SocketException e) {
+		} catch (Exception e) {
 			fireError(e);
 		}
 	}
@@ -176,12 +177,13 @@ public class SocketProxy extends KrollProxy {
 	@Kroll.method
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void sendString(HashMap hm) {
-		KrollDict args = new KrollDict(hm);
 		try {
 			if (_socket == null) {
 				fireError("Cannot send data before the socket is started as a client or server!");
 				return;
 			}
+
+			KrollDict args = new KrollDict(hm);
 			String data = args.getString("data");
 			byte[] bytes = data.getBytes();
 
@@ -190,7 +192,8 @@ public class SocketProxy extends KrollProxy {
 			InetAddress _address = host != null ? InetAddress.getByName(host) : getBroadcastAddress();
 			_socket.send(new DatagramPacket(bytes, bytes.length, _address, port));
 			Log.i(LCAT, "Data Sent!");
-		} catch (IOException e) {
+
+		} catch (Exception e) {
 			fireError(e);
 		}
 	}
@@ -198,12 +201,13 @@ public class SocketProxy extends KrollProxy {
 	@Kroll.method
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void sendBytes(HashMap hm) {
-		KrollDict args = new KrollDict(hm);
 		try {
 			if (_socket == null) {
 				fireError("Cannot send data before the socket is started as a client or server!");
 				return;
 			}
+
+			KrollDict args = new KrollDict(hm);
 			Object[] data = (Object[]) args.get("data");
 			byte[] bytes = new byte[data.length];
 			for (int i = 0; i < bytes.length; i++) {
@@ -215,18 +219,26 @@ public class SocketProxy extends KrollProxy {
 			InetAddress _address = host != null ? InetAddress.getByName(host) : getBroadcastAddress();
 			_socket.send(new DatagramPacket(bytes, bytes.length, _address, port));
 			Log.i(LCAT, "Data Sent!");
-		} catch (IOException e) {
+
+		} catch (Exception e) {
 			fireError(e);
 		}
 	}
 
 	@Kroll.method
 	public void stop() {
-		if (_socket != null) {
+		try {
+			if (_socket == null) {
+				return;
+			}
+
 			stopListening();
 			_socket.close();
 			_socket = null;
 			Log.i(LCAT, "Stopped!");
+
+		} catch (Exception e) {
+			fireError(e);
 		}
 	}
 
