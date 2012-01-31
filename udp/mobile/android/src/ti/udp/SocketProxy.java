@@ -67,6 +67,7 @@ public class SocketProxy extends KrollProxy {
 			}
 		} catch (SocketException e) {
 			e.printStackTrace();
+			fireError(e.toString());
 		}
 		return "";
 	}
@@ -87,6 +88,7 @@ public class SocketProxy extends KrollProxy {
 			return InetAddress.getByAddress(quads);
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
+			fireError(e.toString());
 		}
 		return null;
 	}
@@ -130,10 +132,12 @@ public class SocketProxy extends KrollProxy {
 						if (e.getLocalizedMessage().contains("Interrupted system call")) {
 							_continueListening = false;
 						} else {
-							fireError(e);
+							e.printStackTrace();
+							fireError(e.toString());
 						}
 					} catch (Exception e) {
-						fireError(e);
+						e.printStackTrace();
+						fireError(e.toString());
 					}
 				}
 			}
@@ -162,7 +166,7 @@ public class SocketProxy extends KrollProxy {
 
 			KrollDict args = new KrollDict(hm);
 			_port = args.getInt("port");
-			
+
 			_socket = new DatagramSocket(_port);
 			_socket.setSoTimeout(0);
 			startListening();
@@ -170,7 +174,8 @@ public class SocketProxy extends KrollProxy {
 			Log.i(LCAT, "Socket Started!");
 
 		} catch (Exception e) {
-			fireError(e);
+			e.printStackTrace();
+			fireError(e.toString());
 		}
 	}
 
@@ -194,7 +199,8 @@ public class SocketProxy extends KrollProxy {
 			Log.i(LCAT, "Data Sent!");
 
 		} catch (Exception e) {
-			fireError(e);
+			e.printStackTrace();
+			fireError(e.toString());
 		}
 	}
 
@@ -221,7 +227,8 @@ public class SocketProxy extends KrollProxy {
 			Log.i(LCAT, "Data Sent!");
 
 		} catch (Exception e) {
-			fireError(e);
+			e.printStackTrace();
+			fireError(e.toString());
 		}
 	}
 
@@ -238,7 +245,8 @@ public class SocketProxy extends KrollProxy {
 			Log.i(LCAT, "Stopped!");
 
 		} catch (Exception e) {
-			fireError(e);
+			e.printStackTrace();
+			fireError(e.toString());
 		}
 	}
 
