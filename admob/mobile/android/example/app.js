@@ -14,7 +14,7 @@ var Admob = require('ti.admob');
 
 // then create an adMob view
 var adMobView = Admob.createView({
-    publisherId:"<<your publisher id>>",
+    publisherId:"a14f6b35c5e0f8c",
     testing:false, // default is false
     //top: 10, //optional
     //left: 0, // optional
