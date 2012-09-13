@@ -1,9 +1,15 @@
+
 /**
  * Copyright (c) 2011 by Appcelerator, Inc. All Rights Reserved.
  * Licensed under the terms of the Apache Public License
  * Please see the LICENSE included with this distribution for details.
  * Author: Fred Spencer (fspencer@appcelerator.com)
+
+    Edited on September 13th 2012 by Ultimater@gmail.com
+    Changes:
+	+Added method to PaintViewProxy: setImageFromBlob(TiBlob blob)
  */
+
 
 package ti.modules.titanium.paint;
 
@@ -60,6 +66,12 @@ public class PaintViewProxy extends TiViewProxy {
 	@Kroll.method
 	public void setImage(String imagePath) {
 		paintView.setImage(imagePath);
+	}
+
+	@Kroll.setProperty
+	@Kroll.method
+	public void setImageFromBlob(TiBlob blob) {
+		paintView.setImage(blob);
 	}
 
 	@Kroll.method
