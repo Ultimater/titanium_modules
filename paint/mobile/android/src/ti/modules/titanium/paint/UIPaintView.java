@@ -1,9 +1,15 @@
+
 /**
  * Copyright (c) 2011 by Appcelerator, Inc. All Rights Reserved.
  * Licensed under the terms of the Apache Public License
  * Please see the LICENSE included with this distribution for details.
  * Portions copyright (C) 2007 The Android Open Source Project
  * Author: Fred Spencer (fspencer@appcelerator.com)
+
+    Edited on September 13th 2012 by Ultimater@gmail.com
+    Changes:
+	+Added method to UIPaintView: setImageFromBlob(TiBlob blob)
+	+Added method to PaintView: setImageFromBlob(TiBlob blob)
  */
 
 package ti.modules.titanium.paint;
@@ -99,6 +105,11 @@ public class UIPaintView extends TiUIView {
 		tiPaintView.setImage(imagePath);
 	}
 
+	public void setImageFromBlob(TiBlob blob) {
+		Log.d(LCAT, "Changing image.");
+		tiPaintView.setImageFromBlob(blob);
+	}
+
 	public void clear() {
 		Log.d(LCAT, "Clearing.");
 		tiPaintView.clear();
@@ -151,12 +162,7 @@ public class UIPaintView extends TiUIView {
 		}
 
 		private void touch_start(int id, float x, float y) {
-			if (tiPaths[id] != null) {
-				tiCanvas.drawPath(tiPaths[id], tiPaint);
-				tiPaths[id].reset();
-			} else {
-				tiPaths[id] = new Path();
-			}
+			tiPaths[id] = new Path();
 			tiPaths[id].moveTo(x, y);
 			tiX[id] = x;
 			tiY[id] = y;
@@ -176,14 +182,15 @@ public class UIPaintView extends TiUIView {
 		public boolean onTouchEvent(MotionEvent mainEvent) {
 			for (int i = 0; i < mainEvent.getPointerCount(); i++) {
 				int id = mainEvent.getPointerId(i);
-				float x = mainEvent.getX(id);
-				float y = mainEvent.getY(id);
+				float x = mainEvent.getX(i);
+				float y = mainEvent.getY(i);
 				int action = mainEvent.getAction();
 				if (action > 6) {
 					action = (action % 256) - 5;
 				}
 				switch (action) {
 					case MotionEvent.ACTION_DOWN:
+						finalizePath(id);
 						touch_start(id, x, y);
 						invalidate();
 						break;
@@ -192,11 +199,8 @@ public class UIPaintView extends TiUIView {
 						invalidate();
 						break;
 					case MotionEvent.ACTION_UP:
-						if (eraseState) {
-							// When erasing, we need to be rather aggressive with finalizing the paths.
-							finalizePaths();
-							invalidate();
-						}
+						finalizePath(id);
+						invalidate();
 						break;
 				}
 			}
@@ -204,6 +208,14 @@ public class UIPaintView extends TiUIView {
 			return true;
 		}
 
+		public void finalizePath(int id) {
+			if (tiPaths[id] != null) {
+				tiCanvas.drawPath(tiPaths[id], tiPaint);
+				tiPaths[id].reset();
+				tiPaths[id] = null;
+			}
+		}
+		
 		public void finalizePaths() {
 			for (int i = 0; i < maxTouchPoints; i++) {
 				if (tiPaths[i] != null) {
@@ -222,6 +234,20 @@ public class UIPaintView extends TiUIView {
 			} else {
 				finalizePaths();
 				TiDrawableReference ref = TiDrawableReference.fromUrl(proxy, tiImage);
+				tiBitmap = ref.getBitmap().copy(Bitmap.Config.ARGB_8888, true);
+				tiCanvas = new Canvas(tiBitmap);
+				invalidate();
+			}
+		}
+
+		public void setImageFromBlob(TiBlob blob) {
+			Log.i(LCAT, "setImageFromBlob called");
+			tiImage = blob;
+			if (tiImage == null) {
+				clear();
+			} else {
+				finalizePaths();
+				TiDrawableReference ref = TiDrawableReference.fromBlob(proxy.getActivity(), tiImage);
 				tiBitmap = ref.getBitmap().copy(Bitmap.Config.ARGB_8888, true);
 				tiCanvas = new Canvas(tiBitmap);
 				invalidate();
