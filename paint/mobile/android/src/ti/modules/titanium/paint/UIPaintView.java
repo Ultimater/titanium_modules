@@ -1,4 +1,3 @@
-
 /**
  * Copyright (c) 2011 by Appcelerator, Inc. All Rights Reserved.
  * Licensed under the terms of the Apache Public License
@@ -7,9 +6,11 @@
  * Author: Fred Spencer (fspencer@appcelerator.com)
 
     Edited on September 13th 2012 by Ultimater@gmail.com
-    Changes:
-	+Added method to UIPaintView: setImageFromBlob(TiBlob blob)
-	+Added method to PaintView: setImageFromBlob(TiBlob blob)
+    Changes made:
+	Reverted to latest version [MOD-373]
+	Then:
+	+Added a new method UIPaintView::setImageFromBlob(TiBlob blob)
+	+Added a new method PaintView::setImageFromBlob(TiBlob blob)
  */
 
 package ti.modules.titanium.paint;
@@ -162,7 +163,12 @@ public class UIPaintView extends TiUIView {
 		}
 
 		private void touch_start(int id, float x, float y) {
-			tiPaths[id] = new Path();
+			if (tiPaths[id] != null) {
+				tiCanvas.drawPath(tiPaths[id], tiPaint);
+				tiPaths[id].reset();
+			} else {
+				tiPaths[id] = new Path();
+			}
 			tiPaths[id].moveTo(x, y);
 			tiX[id] = x;
 			tiY[id] = y;
@@ -182,15 +188,14 @@ public class UIPaintView extends TiUIView {
 		public boolean onTouchEvent(MotionEvent mainEvent) {
 			for (int i = 0; i < mainEvent.getPointerCount(); i++) {
 				int id = mainEvent.getPointerId(i);
-				float x = mainEvent.getX(i);
-				float y = mainEvent.getY(i);
+				float x = mainEvent.getX(id);
+				float y = mainEvent.getY(id);
 				int action = mainEvent.getAction();
 				if (action > 6) {
 					action = (action % 256) - 5;
 				}
 				switch (action) {
 					case MotionEvent.ACTION_DOWN:
-						finalizePath(id);
 						touch_start(id, x, y);
 						invalidate();
 						break;
@@ -199,8 +204,11 @@ public class UIPaintView extends TiUIView {
 						invalidate();
 						break;
 					case MotionEvent.ACTION_UP:
-						finalizePath(id);
-						invalidate();
+						if (eraseState) {
+							// When erasing, we need to be rather aggressive with finalizing the paths.
+							finalizePaths();
+							invalidate();
+						}
 						break;
 				}
 			}
@@ -208,14 +216,6 @@ public class UIPaintView extends TiUIView {
 			return true;
 		}
 
-		public void finalizePath(int id) {
-			if (tiPaths[id] != null) {
-				tiCanvas.drawPath(tiPaths[id], tiPaint);
-				tiPaths[id].reset();
-				tiPaths[id] = null;
-			}
-		}
-		
 		public void finalizePaths() {
 			for (int i = 0; i < maxTouchPoints; i++) {
 				if (tiPaths[i] != null) {
